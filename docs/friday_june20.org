@@ -1,0 +1,118 @@
+*  Work done
+
+  *  TDD using nosetests framework
+    *  Install nosetests: 
+#+begin_src python
+pip install nose
+#+end_src
+    *  Running Tests:
+#+begin_src python
+nosetests imagescripttest.py
+#+end_src
+    * Running Tests to capture stdout and strerr also
+#+begin_src python
+nosetests --nocapture imagescripts.py
+#+end_src
+    *  Sample nosetests code:
+      *  import unittest module
+#+begin_src python
+import unittest
+#+end_src
+      *  unittest class should inherit unittest.TestCase class
+#+begin_src python
+class TddInPython(unittest.TestCase):
+#+end_src
+      *  all test cases should begin with test_ prefix.
+#+begin_src python
+def test_get_image_list(self):
+#+end_src
+      *  code:
+#+begin_src python  :tangle imagescripttest.py
+import unittest
+from imagescript import imageos
+
+class TddInPython(unittest.TestCase):
+    def test_get_image_list(self):
+        adapter = imageos()
+        prev_image_list = adapter.get_image_list()
+        assert("test" not in prev_image_list)
+        print prev_image_list
+        print ("\n")
+        image = adapter.create_image("test")
+        print ("\n")
+        cur_image_list = adapter.get_image_list()
+        assert(image.name in cur_image_list)
+        print cur_image_list
+        print ("\n")
+        adapter.delete_image("test")
+        new_image_list = adapter.get_image_list()
+        print new_image_list
+        assert("test" not in new_image_list)
+        print ("\n")
+        print "get_image_list() function passed"
+#+end_src
+
+ *  Develop adapter with using Object oriented programming in python
+
+  *  Classes for image handling, flavor handling, VM handling and VM details
+    *  sample coding guidelines followed:
+      *  Used object oriented style of coding
+#+begin_src python
+class imageos(object):
+#+end_src
+      *  Docstrings are present to descibe each and every procedure
+#+begin_src python
+        """
+        Create an image.
+
+        :param image: The name of the image to get.
+        :rtype: :json: image details
+        """
+#+end_src
+      *  Common global variables are handled with @classmethod directive
+#+begin_src python
+class imageos(object):
+    creds = get_keystone_creds()
+    keystone = ksclient.Client(**creds)
+
+    @classmethod
+    def create_image(cls,name):
+        glance_endpoint = cls.keystone.service_catalog.url_for(service_type='image', endpoint_type='publicURL')
+#+end_src
+      *  code:
+#+begin_src python
+class imageos(object):
+
+    creds = get_keystone_creds()
+    keystone = ksclient.Client(**creds)
+    creds1 = get_nova_creds()
+    nova = nvclient.Client(**creds1)
+		
+    @classmethod
+    def create_image(cls,name):
+        """
+        Create an image.
+
+        :param image: The name of the image to get.
+        :rtype: :json: image details
+        """
+        glance_endpoint = cls.keystone.service_catalog.url_for(service_type='image', endpoint_type='publicURL')
+        glance = glanceclient.Client('1', endpoint=glance_endpoint, token=cls.keystone.auth_token)
+
+        with open('/home/cloud/Downloads/precise-server-cloudimg-amd64-disk1.img', 'rb') as fimage:
+            image = glance.images.create(name=name, is_public=True, disk_format="qcow2", container_format="bare", data=fimage)
+            return image
+#+end_src
+
+*  Challenges
+  *  We have installed openstack server on a VM with 30G hdd space. So once the hdd space is used up by the openstack server, it crached and we will have to re-install the openstack from scratch.
+  *  Figuring the usage of nosetests
+  *  Using the "@classmethod" directive of python
+  *  SSH to vm
+     *  Still facing issues
+     *  cannot login to the vm created on openstack from outside world. -- Issuing floating IP functionality needs to be figured out.
+*  Future work
+  *  Solve the SSH issue.
+  *  Install the required packages for labs and copying of VMManager and Running VMManager server should be automated along with the vm creation module
+  *  complete the conversion of adapter code to Object oriented
+
