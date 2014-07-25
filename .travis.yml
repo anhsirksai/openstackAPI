@@ -7,3 +7,6 @@ python:
 # install: PLEASE CHANGE ME
 # # command to run tests, e.g. python setup.py test
 # script:  PLEASE CHANGE ME
+#
+notifications:
+  email: false
